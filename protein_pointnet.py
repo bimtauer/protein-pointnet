@@ -21,7 +21,6 @@ from keras.layers import Dense, Flatten, Reshape, Dropout
 from keras.layers import Convolution1D, MaxPooling1D, BatchNormalization
 from keras.layers import Lambda
 from protein_import import load_data
-from keras.utils import np_utils
 
 
 def mat_mul(A, B):
@@ -31,7 +30,7 @@ def mat_mul(A, B):
 num_points = 247
 
 # number of categories
-k = 2
+k = 1
 
 # Input data paths
 b_path = '.\Protein Data\Binding_yes'
@@ -46,9 +45,7 @@ y = np.hstack((np.ones(len(binders)),np.zeros(len(nonbinders))))
 # Normalize to max unit length:        
 all_points = X[:,:,:3].reshape(-1, 3)
 max_length = max(np.sum(all_points**2, axis = 1))
-
 X_norm = (X[:,:,:3].reshape(-1, 3)/max_length).reshape(11, num_points, 3)
-
 X_norm = np.dstack((X_norm, X[:,:,3:]))
 
 
@@ -57,11 +54,9 @@ from sklearn.model_selection import train_test_split
 X_train, X_test, y_train, y_test = train_test_split(X_norm, y, test_size = 0.3)
 
 
-y_train = np_utils.to_categorical(y_train, k)
-y_test = np_utils.to_categorical(y_test, k)
 
-# define optimizer
-adam = optimizers.Adam(lr=0.001, decay=0.7)
+
+
 
 # ------------------------------------ Pointnet Architecture
 # input_Transformation_net
@@ -130,13 +125,17 @@ model = Model(inputs=input_points, outputs=prediction)
 print(model.summary())
 
 
+
+# define optimizer
+adam = optimizers.Adam(lr=0.001, decay=0.7)
+
 # compile classification model
 model.compile(optimizer='adam',
-              loss='categorical_crossentropy',
+              loss='binary_crossentropy',
               metrics=['accuracy'])
 
 # Fit model on training data
-for i in range(1,50):
+for i in range(1,30):
     model.fit(X_train, y_train, batch_size=32, epochs=1, shuffle=True, verbose=1)
     # rotate and jitter the points
     #train_points_rotate = rotate_point_cloud(train_points_r)

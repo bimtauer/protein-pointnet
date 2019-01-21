@@ -59,35 +59,46 @@ attributes and methods:
   ...
   u(0,ny-3,nz-3) u(0,ny-2,nz-2) u(0,ny-1,nz-1)
   u(1,0,0) u(1,0,1) u(1,0,2)
-  ...
+  ... 
   attribute "dep" string "positions"
   object "regular positions regular connections" class field
   component "positions" value 1
   component "connections" value 2
   component "data" value 3
 """
-g.
+
 edge1 = g.edges[0]
 edge2 = g.edges[1]
 edge3 = g.edges[2]
 
-test = g.grid
+
+grid = g.grid
 
 edges = g.edges
 
 
-g.interpolated([2,3,2], [2,3,2], [2,3,2])
+g.interpolated([1,1,1], [2,3,2], [2,3,2])
 
+import numpy as np
 # Visualization 
 from mpl_toolkits.mplot3d import Axes3D  # noqa: F401 unused import
 import matplotlib.pyplot as plt
 
+
+
+x = np.arange(30)
+y = np.arange(30)
+z = np.arange(30)
+
+xx,yy,zz = np.meshgrid(x,y,z)
+
+flat = grid .flatten()
+
+flat[flat < 1] =0
+
 fig = plt.figure()
 ax = fig.add_subplot(111, projection='3d')
-
-
-
-ax.plot_surface(test[5], test[1], test[2])
+ax.scatter(xx, yy, zz, c = flat, alpha = 0.2, s = 0.1)
 
 ax.set_xlabel('X Label')
 ax.set_ylabel('Y Label')
