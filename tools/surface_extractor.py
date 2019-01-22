@@ -40,7 +40,7 @@ def get_surfaces(path):
     surface_dict = {}
     for file in os.listdir(path):
         if file.endswith('.xml'):
-            surface = get_surface(path, '1dmk-A.xml')
+            surface = get_surface(path, file)
             surface_dict[file[:-4]] = surface
     return surface_dict
 

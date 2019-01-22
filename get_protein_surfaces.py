@@ -6,14 +6,14 @@ Created on Tue Jan 22 00:18:55 2019
 """
 from tools.protein_scraper import download_and_unzip_surfaces
 from tools.surface_extractor import get_surfaces
-import pandas as pd
+import trimesh
 #To get surface xmls from ef-site
 ef_url = 'https://pdbj.org/eF-site/servlet/Download?type=efvet&entry_id={}'
 query_list = ['1nsf-A', '1dmk-A', '1yst-H', 'Whatever']
 surfaces_path = 'ef-site_downloads'
 
 #Run download and unzip
-download_and_unzip_surfaces(query_list, ef_url, surfaces_path)
+#download_and_unzip_surfaces(query_list, ef_url, surfaces_path)
 
 #Assuming I have all the XMLs unpacked, this stores the surface for each protein in a dictionary
 surfaces = get_surfaces(surfaces_path)
@@ -25,6 +25,9 @@ surfaces = get_surfaces(surfaces_path)
 #Assume there is a list of indexes:
 import random
 test_list = random.sample(range(1, 100), 50)
+
+
+test_list = np.loadtxt('1nsf-A.ndx')
 # There is a problem with this list: unless it reliably contains indeces for connected
 # points, we cannot extract both vertices and faces
 # so i need to find all faces that contain indeces also present in the list
@@ -53,16 +56,75 @@ def retrieve_pocket(ID, pocket_dict, surfaces):
     
 vertices, faces = retrieve_pocket('1nsf-A', pocket_dict, surfaces)
 
-#Plot to check
+###############################################################################
+#Original protein:
+surface = surfaces['1nsf-A']
+ver = surface['coordinates']
+fac = surface['triangles']
 
+
+#Plot to check
+import numpy as np
+import plotly.plotly as py
+import plotly.figure_factory as FF
+import plotly.graph_objs as go
+
+
+eps = []
+for triangle in faces:
+    first = vertices[triangle[0]][3]
+    second = vertices[triangle[1]][3]
+    third = vertices[triangle[2]][3]
+    ep = np.mean([first, second, third])
+    eps.append(ep)
+        
+#The pocket surface
 fig1 = FF.create_trisurf(x=vertices[:,0], 
                          y=vertices[:,1], 
                          z=vertices[:,2],
                          simplices=faces,
+                         color_func=eps,
                          title="Pocket",
-                         c="red")
-py.iplot(fig1, filename="Pocket Extract")
+                         colormap="Portland")
 
+#The remaining atoms of the protein
+trace = go.Scatter3d(
+    x=ver[:,0],
+    y=ver[:,1],
+    z=ver[:,2],
+    mode='markers',
+    marker=dict(
+        size=5,
+        color='grey',                # set color to an array/list of desired values
+        colorscale='Viridis',   # choose a colorscale
+        opacity=0.8
+    )
+)
+
+
+data = [trace,  fig1.data[0], fig1.data[1]]
+
+fig = go.Figure(data=data)
+py.iplot(fig, filename='Protein Pocket Sample')
+
+
+###############################################################################
+from scipy.interpolate import griddata
+
+def sample_from_pocket(vertices, faces, nr_samples):
+    mesh = trimesh.base.Trimesh(vertices[:,:3], faces)
+    #sample_surface_even would be better but doesn't return accurate number
+    sample = trimesh.sample.sample_surface(mesh, nr_samples)[0]
+    return sample
+
+def interpolate_sample(sample, vertices):
+    interpolated = griddata(vertices[:,:3], vertices[:,3:5], sample)
+    return interpolated 
+
+sample = sample_from_pocket(vertices, faces, 100) 
+
+interpolated = interpolate_sample(sample, vertices)  
+    
 ###############################################################################
 
 #Plot all surfaces:
@@ -76,7 +138,6 @@ faces = surfaces['1nsf-A']['triangles']
 
 mesh = trimesh.base.Trimesh(vertices[:,:3], faces)
 sample = trimesh.sample.sample_surface_even(mesh, 1000)
-
 p = sample[0]
 
 
