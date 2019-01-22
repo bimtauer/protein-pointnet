@@ -20,26 +20,24 @@ from keras.models import Model
 from keras.layers import Dense, Flatten, Reshape, Dropout
 from keras.layers import Convolution1D, MaxPooling1D, BatchNormalization
 from keras.layers import Lambda
-from protein_import import load_data
+from tools.get_protein_surfaces import sample_all
 
 
-def mat_mul(A, B):
-    return tf.matmul(A, B)
 
 # number of points in each sample
-num_points = 247
+num_points = 1000
+
+# number of dimensions
+d = 5
 
 # number of categories
-k = 1
+k = 3
 
-# Input data paths
-b_path = '.\Protein Data\Binding_yes'
-binders = load_data(b_path, num_points)#[:,:,:3]
-nb_path = '.\Protein Data\Binding_no'
-nonbinders = load_data(nb_path, num_points)#[:,:,:3]
+# Load Data
 
-X = np.vstack((binders, nonbinders))
-y = np.hstack((np.ones(len(binders)),np.zeros(len(nonbinders))))
+from dataloader import return_samples
+
+samples = return_samples()
 
 
 # Normalize to max unit length:        
@@ -55,13 +53,18 @@ X_train, X_test, y_train, y_test = train_test_split(X_norm, y, test_size = 0.3)
 
 
 
+###############################################################################
+# Code from https://github.com/charlesq34/pointnet
+
+def mat_mul(A, B):
+    return tf.matmul(A, B)
 
 
 
 # ------------------------------------ Pointnet Architecture
 # input_Transformation_net
-input_points = Input(shape=(num_points, 8))
-x = Convolution1D(64, 1, activation='relu', input_shape=(num_points, 8))(input_points)
+input_points = Input(shape=(num_points, d))
+x = Convolution1D(64, 1, activation='relu', input_shape=(num_points, d))(input_points)
 x = BatchNormalization()(x)
 x = Convolution1D(128, 1, activation='relu')(x)
 x = BatchNormalization()(x)
@@ -72,14 +75,14 @@ x = Dense(512, activation='relu')(x)
 x = BatchNormalization()(x)
 x = Dense(256, activation='relu')(x)
 x = BatchNormalization()(x)
-x = Dense(64, weights=[np.zeros([256, 64]), np.identity(8).ravel().astype(np.float32)])(x)
-input_T = Reshape((8, 8))(x)
+x = Dense(64, weights=[np.zeros([256, 64]), np.identity(d).ravel().astype(np.float32)])(x)
+input_T = Reshape((d, d))(x)
 
 # forward net
 g = Lambda(mat_mul, arguments={'B': input_T})(input_points)
-g = Convolution1D(64, 1, input_shape=(num_points, 8), activation='relu')(g)
+g = Convolution1D(64, 1, input_shape=(num_points, d), activation='relu')(g)
 g = BatchNormalization()(g)
-g = Convolution1D(64, 1, input_shape=(num_points, 8), activation='relu')(g)
+g = Convolution1D(64, 1, input_shape=(num_points, d), activation='relu')(g)
 g = BatchNormalization()(g)
 
 # feature transform net

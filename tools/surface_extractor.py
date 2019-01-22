@@ -38,6 +38,7 @@ def get_surface(path, XML):
 
 def get_surfaces(path):
     surface_dict = {}
+    print(f'Collecting protein surfaces from {path}')
     for file in os.listdir(path):
         if file.endswith('.xml'):
             surface = get_surface(path, file)

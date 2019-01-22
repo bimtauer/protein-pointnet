@@ -4,8 +4,8 @@ Created on Tue Jan 22 00:18:55 2019
 
 @author: bimta
 """
-from tools.surface_extractor import get_surfaces
-from tools.pocket_retrieval import get_pocket_indeces
+from surface_extractor import get_surfaces
+from pocket_retrieval import get_pocket_indeces
 from scipy.interpolate import griddata
 import trimesh
 import numpy as np
@@ -82,5 +82,4 @@ def sample_all(path, nr_samples):
         samples[ID] = sample
     return samples
 
-test = sample_all('Protein Data\\ATP', 1000)
     
