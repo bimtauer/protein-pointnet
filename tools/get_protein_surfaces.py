@@ -4,8 +4,8 @@ Created on Tue Jan 22 00:18:55 2019
 
 @author: bimta
 """
-from surface_extractor import get_surfaces
-from pocket_retrieval import get_pocket_indeces
+from .surface_extractor import get_surfaces
+from .pocket_retrieval import get_pocket_indeces
 from scipy.interpolate import griddata
 import trimesh
 import numpy as np
@@ -71,11 +71,12 @@ def sample_all(path, nr_samples):
     assert len(os.listdir(surfaces_path)) == len(os.listdir(indeces_path))
     
     IDs = [ID[:-4] for ID in os.listdir(surfaces_path)]
-    print(IDs)
+    #print(IDs)
     surfaces_dict = get_surfaces(surfaces_path)
     pocket_dict = get_pocket_indeces(indeces_path)
     
     for ID in IDs:
+        print(f'Retrieving pocket surface sample for {ID}')
         surface = surfaces_dict[ID]
         pocket_indeces = pocket_dict[ID]
         sample = sample_from_pocket(pocket_indeces, surface, nr_samples)

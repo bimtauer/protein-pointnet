@@ -20,7 +20,6 @@ from keras.models import Model
 from keras.layers import Dense, Flatten, Reshape, Dropout
 from keras.layers import Convolution1D, MaxPooling1D, BatchNormalization
 from keras.layers import Lambda
-from tools.get_protein_surfaces import sample_all
 
 
 
@@ -39,13 +38,19 @@ from dataloader import return_samples
 
 samples = return_samples()
 
+#First hundred from each
+atps = samples['ATP'][:100]
+sams = samples['SAM'][:100]
 
+y = np.hstack([np.ones(100), np.zeros(100)])            
+
+"""
 # Normalize to max unit length:        
 all_points = X[:,:,:3].reshape(-1, 3)
 max_length = max(np.sum(all_points**2, axis = 1))
 X_norm = (X[:,:,:3].reshape(-1, 3)/max_length).reshape(11, num_points, 3)
 X_norm = np.dstack((X_norm, X[:,:,3:]))
-
+"""
 
 from sklearn.model_selection import train_test_split
 #Spliting in train and test:

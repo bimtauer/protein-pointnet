@@ -8,6 +8,7 @@ Created on Mon Jan 21 22:27:14 2019
 import os
 import numpy as np
 import xml.etree.ElementTree as ET
+import tqdm
 
 def get_surface(path, XML):
     tree = ET.parse(os.path.join(path, XML))
@@ -39,7 +40,7 @@ def get_surface(path, XML):
 def get_surfaces(path):
     surface_dict = {}
     print(f'Collecting protein surfaces from {path}')
-    for file in os.listdir(path):
+    for file in tqdm(os.listdir(path)):
         if file.endswith('.xml'):
             surface = get_surface(path, file)
             surface_dict[file[:-4]] = surface
