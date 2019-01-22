@@ -4,8 +4,8 @@ Created on Tue Jan 22 00:18:55 2019
 
 @author: bimta
 """
-from .surface_extractor import get_surfaces
-from .pocket_retrieval import get_pocket_indeces
+from .get_stuff import get_surfaces
+from .get_stuff import get_pocket_indeces
 from scipy.interpolate import griddata
 import trimesh
 import numpy as np
