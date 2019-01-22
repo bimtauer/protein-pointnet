@@ -30,7 +30,7 @@ def request_url(URL):
     return res
 
 def is_available(request):
-    soup = BeautifulSoup(request.content)
+    soup = BeautifulSoup(request.content, features="html.parser")
     title = soup.find('title')
     if title.contents[0].strip() == 'DB Error':
         return False
